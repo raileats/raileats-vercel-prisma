@@ -5,6 +5,7 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL") // non-pooled URL for migrations
 }
 
 model User {
@@ -19,14 +20,14 @@ model User {
 }
 
 model Station {
-  id        String   @id @default(cuid())
-  code      String   @unique
-  name      String
-  city      String
-  state     String?
-  platforms Int?
+  id          String   @id @default(cuid())
+  code        String   @unique
+  name        String
+  city        String
+  state       String?
+  platforms   Int?
   restaurants Restaurant[]
-  orders    Order[]
+  orders      Order[]
 }
 
 model Restaurant {
@@ -40,7 +41,7 @@ model Restaurant {
   ratingCount Int      @default(0)
   items       MenuItem[]
   station     Station  @relation(fields: [stationId], references: [id])
-  orders    Order[]
+  orders      Order[]
 }
 
 model MenuItem {
