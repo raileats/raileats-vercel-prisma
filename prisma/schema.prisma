@@ -1,0 +1,85 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  phone     String?  @unique
+  name      String?
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  orders    Order[]
+}
+
+model Station {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  name      String
+  city      String
+  state     String?
+  platforms Int?
+  restaurants Restaurant[]
+  orders    Order[]
+}
+
+model Restaurant {
+  id          String   @id @default(cuid())
+  name        String
+  stationId   String
+  cuisines    String[]
+  minOrder    Int      @default(0)
+  isActive    Boolean  @default(true)
+  ratingAvg   Float    @default(0)
+  ratingCount Int      @default(0)
+  items       MenuItem[]
+  station     Station  @relation(fields: [stationId], references: [id])
+  orders    Order[]
+}
+
+model MenuItem {
+  id            String   @id @default(cuid())
+  restaurantId  String
+  name          String
+  description   String?
+  pricePaise    Int
+  veg           Boolean  @default(true)
+  category      String?
+  available     Boolean  @default(true)
+  restaurant    Restaurant @relation(fields: [restaurantId], references: [id])
+}
+
+model Order {
+  id           String   @id @default(cuid())
+  userId       String
+  stationId    String
+  restaurantId String
+  status       OrderStatus @default(PENDING)
+  totalPaise   Int
+  items        Json
+  trainNo      String
+  coach        String?
+  seat         String?
+  eta          DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user         User       @relation(fields: [userId], references: [id])
+  station      Station    @relation(fields: [stationId], references: [id])
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PREPARING
+  DISPATCHED
+  DELIVERED
+  CANCELLED
+}
